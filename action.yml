@@ -1,0 +1,79 @@
+name: "invoke-aws-lambda"
+description: "Invoke AWS Lambda function (Rust implementation)"
+branding:
+  icon: arrow-up-right
+  color: orange
+
+inputs:
+  AWS_ACCESS_KEY_ID:
+    description: "AWS Access Key ID"
+    required: true
+  AWS_SECRET_ACCESS_KEY:
+    description: "AWS Secret Access Key"
+    required: true
+  AWS_SESSION_TOKEN:
+    description: "AWS Session Token (for temporary credentials)"
+    required: false
+  REGION:
+    description: "AWS region where the Lambda is deployed"
+    required: false
+    default: us-east-1
+  FunctionName:
+    description: "The name of the Lambda function, version, or alias"
+    required: true
+  InvocationType:
+    description: "RequestResponse | Event | DryRun"
+    required: false
+    default: RequestResponse
+  LogType:
+    description: "None | Tail"
+    required: false
+    default: None
+  ClientContext:
+    description: "Base64-encoded data about the invoking client"
+    required: false
+  Payload:
+    description: "JSON input to pass to the Lambda function"
+    required: false
+  Qualifier:
+    description: "Version or alias of the function to invoke"
+    required: false
+  SUCCEED_ON_FUNCTION_FAILURE:
+    description: "Set to true to succeed even when Lambda returns a function error"
+    required: false
+    default: "false"
+
+outputs:
+  response:
+    description: "JSON response from the Lambda invocation (StatusCode, ExecutedVersion, Payload, LogResult, FunctionError)"
+
+runs:
+  using: composite
+  steps:
+    - name: Download invoke-aws-lambda binary
+      shell: bash
+      run: |
+        BIN_PATH="${{ github.action_path }}/invoke-aws-lambda"
+        if [ ! -f "$BIN_PATH" ]; then
+          curl -sSL \
+            "https://github.com/${{ github.repository_owner }}/invoke-aws-lambda-rs/releases/latest/download/invoke-aws-lambda-linux-x86_64" \
+            -o "$BIN_PATH"
+          chmod +x "$BIN_PATH"
+        fi
+
+    - name: Invoke Lambda
+      id: invoke
+      shell: bash
+      env:
+        INPUT_AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
+        INPUT_AWS_SECRET_ACCESS_KEY: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+        INPUT_AWS_SESSION_TOKEN: ${{ inputs.AWS_SESSION_TOKEN }}
+        INPUT_REGION: ${{ inputs.REGION }}
+        INPUT_FUNCTIONNAME: ${{ inputs.FunctionName }}
+        INPUT_INVOCATIONTYPE: ${{ inputs.InvocationType }}
+        INPUT_LOGTYPE: ${{ inputs.LogType }}
+        INPUT_CLIENTCONTEXT: ${{ inputs.ClientContext }}
+        INPUT_PAYLOAD: ${{ inputs.Payload }}
+        INPUT_QUALIFIER: ${{ inputs.Qualifier }}
+        INPUT_SUCCEED_ON_FUNCTION_FAILURE: ${{ inputs.SUCCEED_ON_FUNCTION_FAILURE }}
+      run: "${{ github.action_path }}/invoke-aws-lambda"
