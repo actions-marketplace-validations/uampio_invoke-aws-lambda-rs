@@ -9,7 +9,7 @@ path = "src/main.rs"
 
 [dependencies]
 aws-config = { version = "1", features = ["behavior-version-latest"] }
-aws-sdk-lambda = "1"
+aws-sdk-lambda = { version = "1", features = ["behavior-version-latest"] }
 aws-credential-types = "1"
 aws-types = "1"
 tokio = { version = "1", features = ["full"] }
