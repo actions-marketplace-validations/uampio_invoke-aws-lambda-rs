@@ -1,7 +1,7 @@
 use aws_config::Region;
 use aws_credential_types::Credentials;
 use aws_sdk_lambda::{
-    config::Builder,
+    config::{BehaviorVersion, Builder},
     primitives::Blob,
     types::{InvocationType, LogType},
     Client,
@@ -60,6 +60,7 @@ async fn main() {
     );
 
     let config = Builder::new()
+        .behavior_version(BehaviorVersion::latest())
         .region(Region::new(region))
         .credentials_provider(creds)
         .build();
